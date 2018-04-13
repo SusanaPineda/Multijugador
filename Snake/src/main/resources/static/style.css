@@ -1,0 +1,75 @@
+#playground {
+	width: 640px;
+	height: 480px;
+	background-color: #000;
+}
+
+#console-container {
+	float: left;
+	margin-left: 15px;
+	width: 300px;
+}
+
+#console {
+	border: 1px solid #CCCCCC;
+	border-right-color: #999999;
+	border-bottom-color: #999999;
+	height: 480px;
+	overflow-y: scroll;
+	padding-left: 5px;
+	padding-right: 5px;
+	width: 100%;
+}
+
+#console p {
+	padding: 0;
+	margin: 0;
+}
+
+#modal4{
+	border: 1px solid #CCCCCC;
+	border-right-color: #999999;
+	border-bottom-color: #999999;
+	background-color: #5cb85c;
+	height: 480px;
+	overflow-y: scroll;
+	padding-left: 5px;
+	padding-right: 5px;
+	width: 100%;
+	text-decoration-color: white;
+}
+
+/* Modal Header */
+.modal-header {
+    padding: 2px 16px;
+    background-color: #5cb85c;
+    color: white;
+}
+
+/* Modal Body */
+.modal-body {
+	background-color: #5cb85c;
+	padding: 2px 16px;
+	
+}
+
+/* Modal Footer */
+.modal-footer {
+    padding: 2px 16px;
+    background-color: #5cb85c;
+    color: white;
+}
+
+/* Modal Content */
+.modal-content {
+	top: 70%;
+    position: fixed;
+    background-color: #fefefe;
+    margin: auto;
+    padding: 0;
+    border: 1px solid #888;
+    width: 80%;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+    
+}
+

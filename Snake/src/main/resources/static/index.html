@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+ <script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
+<script src="app.js"></script>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Multiplayer Snake</title>
+<link rel="stylesheet" href="style.css"></link>
+</head>
+<body>
+	<div style="float: left">
+		<canvas id="playground" width="640" height="480"></canvas>
+	</div>
+	<div id="console-container">
+		<div id="console"></div>
+	</div>
+	</div>
+	
+	<div id="modal1" class="modal-content">
+    <div class="modal-header">
+         <h1>Introduzca su nombre de usuario</h1>
+         </div>
+<div class="modal-body">
+        <input id="texto1"></input>
+        </div>
+        <div class="modal-footer">
+        <button id="button1" onclick="actionNombre()">Aceptar</button>
+    </div>
+</div>
+<div id="modal2" class="modal-content">
+    <div class="modal-header">
+         <h1>Introduzca la sala</h1>
+	</div>
+	<div class="modal-body">
+        <input id="texto2"></input>
+    </div>
+        <div class="modal-footer">
+        	<button id="button2" onclick="actionCrear()">Crear sala</button>
+        	<button id="button3" onclick="actionUnir()">Unirse a la sala</button>
+        	<button id="button4" onclick="actionCancelar()">Cancelar</button>
+        	
+    	</div>
+</div>
+<div id="modal3" class="modal-content">
+	<div class="modal-footer">
+		<button id="button5" onclick="actionIniciar()">Iniciar</button>
+	</div>
+</div>
+<div id="modal4">
+	<h2>Muro de la fama!</h2>
+	<button id="button6" onclick="actionMuro()">Ver muro de la fama</button>
+</div>
+</body>
+</html>
