@@ -16,17 +16,15 @@ public class SnakeHandler extends TextWebSocketHandler {
 
 	private static final String SNAKE_ATT = "snake";
 
-	private AtomicInteger snakeIds = new AtomicInteger(0);
-	private AtomicInteger salasIds = new AtomicInteger(0);
+
 
 	private SnakeGame snakeGame = new SnakeGame();
 	private Lock l=new ReentrantLock();
+	private Lock lmuro=new ReentrantLock();
 	  Executor executor = Executors.newFixedThreadPool(20);
 	 
 	
-	Snake s;
-	Sala sal;
-	
+
 	
 	
 	
@@ -46,7 +44,7 @@ public class SnakeHandler extends TextWebSocketHandler {
 		
 		
 		try {
-			int id=snakeIds.getAndIncrement();
+			int id=snakeGame.snakeIds.getAndIncrement();
 			String payload = message.getPayload();
 			
 			JSONObject json = new JSONObject(payload);
@@ -65,10 +63,10 @@ public class SnakeHandler extends TextWebSocketHandler {
 					       String msg; //Tendrá el mensaje de confirmación o no de que la sala existe o no
 				             String nombre = json.getString("user");
 				             System.out.println(nombre);
-				             s = new Snake(id, session, nombre);
+				            Snake s = new Snake(id, session, nombre);
 				             s.setHiloBlock(Thread.currentThread());
 				             System.out.println("Nombre de usuario "+nombre);
-				             
+				             Sala sal;
 				             session.getAttributes().put(SNAKE_ATT, s);
 				             if(json.getString("ComandoSala").equals("Crear")){
 				              
@@ -78,13 +76,13 @@ public class SnakeHandler extends TextWebSocketHandler {
 				            	  if(snakeGame.getNumSalas() == 0){
 				            		  snakeGame.startTimer();
 				            	  }
-				            	  int idSala = salasIds.getAndIncrement();
-				              String nom = json.getString("Sala");
+				               int idSala = snakeGame.salasIds.getAndIncrement();
+				               String nom = json.getString("Sala");
 				               System.out.println(nom);
 				               
-				               sal = new Sala(id, nom);
+				              sal = new Sala(id, nom,s);
 				               sal.AñadirJugador(s);
-				               sal.idCreador=s.getId();
+				               
 
 				               
 				               s.setSala(sal);
@@ -93,17 +91,18 @@ public class SnakeHandler extends TextWebSocketHandler {
 				               snakeGame.addSala(sal);
 				               snakeGame.addSnake(s);
 				              
-				               snakeGame.lock();
+				               //snakeGame.lock();
 				               msg="{\"type\": \"Okcrear\",\"data\":\"Ok\"}";
 				               s.sendMessage(msg);
-				               snakeGame.unlock();
+				               //snakeGame.unlock();
 				              
 				             }else{
 				              
-				              snakeGame.lock();
+				              //snakeGame.lock();
 				              msg="{\"type\": \"Okcrear\",\"data\":\"NotOk\"}";
 				              s.sendMessage(msg);
-				              snakeGame.unlock();
+				              //snakeGame.unlock();
+				              l.unlock();
 				              return;
 				              }
 				             //si el comando es unir:
@@ -125,52 +124,52 @@ public class SnakeHandler extends TextWebSocketHandler {
 				            
 				            int aux3 = sal.contador.availablePermits();
 				         if(aux3 == 0){ 
-				        	 snakeGame.lock();
+				        	 //snakeGame.lock();
 				        	 msg="{\"type\": \"empezar\"}";
 				        	 sal.getCreador().sendMessage(msg);
-				        	 snakeGame.unlock();
+				        	 //snakeGame.unlock();
 				        	 sal.partida_empezada=true;
 				        	 
 				         }
 				         if(aux3>=2 && (!sal.partida_empezada)){
-				        	 snakeGame.lock();
+				        	 //snakeGame.lock();
 				        	 msg="{\"type\": \"iniciar\"}";
 			    			   System.out.println("----------------->"+msg);  
 			    			   sal.getCreador().sendMessage(msg);
-			    			 snakeGame.unlock();
+			    			 //snakeGame.unlock();
 				         }
 				             
 				         
 				            if(comprobar){ //true si se ha añadido el jugador
 				            s.setSala(sal);
-				            snakeGame.lock();
+				            //snakeGame.lock();
 				            msg="{\"type\": \"Okunir\",\"data\":\"Ok\"}";
 				            s.sendMessage(msg);
-				            snakeGame.unlock();
+				            //snakeGame.unlock();
 				            
 				              }
 				              else{
-				            	  session.getAttributes().remove(SNAKE_ATT, s);
-				               snakeGame.lock();
-				               msg="{\"type\": \"Okunir\",\"data\":\"NotOk\"}";
+				            	  //session.getAttributes().remove(SNAKE_ATT, s);
+				               //snakeGame.lock();
+				                msg="{\"type\": \"Okunir\",\"data\":\"NotOk\"}";
 				               s.sendMessage(msg);
-				               snakeGame.unlock();
-				               
+				               //snakeGame.unlock();
+				               l.unlock();
 				               return;
 				              }
-				           }
+				           }//Sala no existe
 				           else{
-				            	  session.getAttributes().remove(SNAKE_ATT, s);
-				               snakeGame.lock();
+				            	//session.getAttributes().remove(SNAKE_ATT, s);
+				               //snakeGame.lock();
 				               msg="{\"type\": \"Okunir\",\"data\":\"NotOk\"}";
 				               s.sendMessage(msg);
-				               snakeGame.unlock();
-				               
+				               //snakeGame.unlock();
+				               l.unlock();
 				               return;
 				              }}
 				            
 				            
-				             snakeGame.addSnake(s);
+				             
 				             	 
 				             StringBuilder sb = new StringBuilder();
 				             for (Snake snake : sal.getLista().values()) {   
@@ -179,10 +178,12 @@ public class SnakeHandler extends TextWebSocketHandler {
 				             }
 				             sb.deleteCharAt(sb.length()-1);
 				             String msg2 = String.format("{\"type\": \"join\",\"data\":[%s]}", sb.toString());
-				             snakeGame.lock();
+				             //snakeGame.lock();
 				             snakeGame.broadcast(msg2, s.getSala());
-				             snakeGame.unlock();
+				             //snakeGame.unlock();
+				             snakeGame.pintar();
 				             l.unlock();
+				            // snakeGame.pintar();
 				      
 				      } catch (Exception e) {
 				       // TODO Auto-generated catch block
@@ -210,9 +211,9 @@ public class SnakeHandler extends TextWebSocketHandler {
 				  Thread añadir=sss.getHiloBlock();
 				  añadir.interrupt();
 				   String ms="{\"type\": \"cancelar\",\"info\": \"Espera cancelada\"}";
-				   snakeGame.lock();
-				   s.sendMessage(ms);
-				   snakeGame.unlock();
+				   //snakeGame.lock();
+				   sss.sendMessage(ms);
+				   //snakeGame.unlock();
 				   break;
 
 	    	
@@ -224,38 +225,30 @@ public class SnakeHandler extends TextWebSocketHandler {
  			   	break;
  			
 			case "Muro":
-				//Snake sm = (Snake) session.getAttributes().get(SNAKE_ATT);
+				
+				
+				//System.err.println("MUROOOOOOOOOOOOOOO");
+				
+				
 				Snake snake = (Snake) session.getAttributes().get(SNAKE_ATT);
-				System.out.println("numero de salas:"+snakeGame.getNumSalas());
-				if((snakeGame.getNumSalas() == 1)&&(snake.getSala().getPulsadoMuro() == false)){
-					StringBuilder sb = new StringBuilder();
+				
+				
+					String cadena=snakeGame.Mejores();
+					String msg2 = String.format("{\"type\": \"muro\",\"data\":\"%s\"}",cadena);
+					
+					snake.sendMessage(msg2);
+					
+						
+						
+					
 					
 					
 					/*
-					 * 
-					 * //tiene que recorrer los mejores!!
-					 */
-					for (Snake sm : snakeGame.Mejores()) {   
-						sb.append(String.format("{\"id\": %d, \"puntuacion\": \"%d\",\"nombre\":\"%s\"}", sm.getId(), sm.getPuntuacion(),sm.getName()));
-						sb.append(',');
-					}
-								             
-					sb.deleteCharAt(sb.length()-1);
-					String msg2 = String.format("{\"type\": \"muro\",\"data\":[%s]}", sb.toString());
-					System.out.println(msg2);
-					for(Snake sna : snakeGame.getSnakes()){
-						snakeGame.lock();
-						sna.sendMessage(msg2);	
-						snakeGame.unlock();
-					}
-					
-					
-					
 				}else{
 						
 						//Sala sal = (Sala) session.getAttributes().get("sala");
 						System.out.println("quedan partidas en juego");
-						 snakeGame.lock();
+						 //snakeGame.lock();
 			        	 String msn="{\"type\": \"partidasEnJuego\"}";
 			        	 snake.sendMessage(msn);
 			        	 System.out.println("pulsado muro = "+snake.getSala().getPulsadoMuro());
@@ -264,21 +257,23 @@ public class SnakeHandler extends TextWebSocketHandler {
 			        		  snake.getSala().muro();
 			        		  snakeGame.DecSalas();
 			        	  }
-			        	 snakeGame.unlock();
+			        	 //snakeGame.unlock();
 			        	  	
 						//enviar mensaje para mostrar pantallas de espera
-					}
+					}*/
 				 
 				break;
 				
 			case "finPartida":
-				for (Snake snk : snakeGame.getSnakes()){
+				
+				/*for (Snake snk : snakeGame.getSnakes()){
 					String msg = String.format("{\"type\": \"leave\", \"id\": %d,\"nombre\":\"%s\"}", snk.getId(),snk.getName());
-					snakeGame.lock();
-					snakeGame.broadcast(msg, snk.getSala());
-					snakeGame.unlock();
-					snakeGame.getSnakes().clear();
-				}
+					//snakeGame.lock();
+					//snakeGame.broadcast(msg, snk.getSala());
+					//snakeGame.unlock();
+					snakeGame.removeSnake(snk);
+				}*/
+				
 				}	
 
 			System.out.println(payload);
@@ -291,7 +286,7 @@ public class SnakeHandler extends TextWebSocketHandler {
 	}
 
 	@Override
-	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+	public void afterConnectionClosed(WebSocketSession session, CloseStatus status)  {
 
 		System.out.println("Connection closed. Session " + session.getId());
 
@@ -299,15 +294,25 @@ public class SnakeHandler extends TextWebSocketHandler {
 		
 		
 		if(s != null){
-			//snakeGame.removeSnake(s);
-			//snakeGame.getSnakes().remove(s);
-			snakeGame.lock();
 			String msg = String.format("{\"type\": \"leave\", \"id\": %d,\"nombre\":\"%s\"}", s.getId(),s.getName());
 			System.out.println("-------------------------------->"+s.getId());
-			Snake sn=(Snake) session.getAttributes().get(SNAKE_ATT);
+			//snakeGame.lock();
+			try{
+		    snakeGame.broadcast(msg, s.getSala());
+		    snakeGame.removeSnake(s);
+		    snakeGame.pintar();
+			}catch(Exception e){
+				
+			}
+		   //snakeGame.unlock();
+		    
+		
 			
-		    snakeGame.broadcast(msg, sn.getSala());
-		    snakeGame.unlock();
+		    
+		    
+			//snakeGame.pintar();
+			
+		    
 		}
 		
 	}

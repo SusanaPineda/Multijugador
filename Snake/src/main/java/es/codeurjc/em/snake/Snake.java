@@ -31,6 +31,7 @@ public class Snake {
 		this.id = id;
 		this.session = session;
 		this.hexColor = SnakeUtils.getRandomHexColor();
+		
 		resetState();
 	}
 	//restaura los valores de la serpiente (todo a 0)
@@ -52,8 +53,13 @@ public class Snake {
 	}
 	
 	//envio de mensajes
-	protected void sendMessage(String msg) throws Exception {
+	synchronized protected void sendMessage(String msg)  {
+		try{
+		if(this.session.isOpen())
 		this.session.sendMessage(new TextMessage(msg));
+		}catch(Exception e){
+			
+		}
 	}
 	//movimiento serpiente
 	public synchronized void update(Collection<Snake> snakes) throws Exception {
@@ -91,6 +97,8 @@ public class Snake {
 			boolean headCollision = this.id != snake.id && snake.getHead().equals(this.head);
 			//choca con la cola
 			boolean tailCollision = snake.getTail().contains(this.head);
+			if(snake!=null)
+			if(snake.getSala()!=null)	
 			if(snake.getSala().getComida()!=null){
 			boolean comidaCollision =snake.getHead().equals(snake.getSala().getComida().getL());
 			

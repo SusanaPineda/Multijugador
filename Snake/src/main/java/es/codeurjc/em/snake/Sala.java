@@ -6,21 +6,22 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 public class Sala {
 	int id; //identificador de la sala
-	private ConcurrentHashMap<Integer, Snake> snakes = new ConcurrentHashMap<>();
-	private ConcurrentHashMap<Integer, Snake> snakesEspera = new ConcurrentHashMap<>();
+	private  ConcurrentHashMap<Integer, Snake> snakes = new ConcurrentHashMap<>();
+	
 	 Semaphore contador;
 	boolean partida_empezada=false;
 	private int contadorComida = 0;
 	 
 	String nombre;
-	int idCreador;
+	Snake Creador;
 	private Comida comida;
 	Thread bloqueado;
 	
 	private boolean pulsadoMuro = false;
 	
-	Sala(int id, String nombre){
+	Sala(int id, String nombre,Snake creador){
 		this.id = id;
+		this.Creador=creador;
 		this.nombre = nombre;
 		contador=new Semaphore(4, true);
 		setComida(null);
@@ -59,8 +60,8 @@ public class Sala {
 		 
 	 }
 
-	synchronized Snake getCreador(){
-		return snakes.get(idCreador);
+	 Snake getCreador(){
+		return this.Creador;
 	}
 		 
 		 
@@ -74,12 +75,7 @@ public class Sala {
 	ConcurrentHashMap<Integer,Snake> getLista(){
 		return this.snakes;
 	}
-	ConcurrentHashMap<Integer,Snake> getEspera(){
-		return this.snakesEspera;
-	}
-	boolean SerpientesEsperando(){
-		return snakesEspera.isEmpty();
-	}
+	
 	public Comida getComida() {
 		return comida;
 	}
